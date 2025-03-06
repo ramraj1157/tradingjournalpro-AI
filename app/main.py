@@ -7,15 +7,10 @@ from app.routes import technical
 
 app = FastAPI(default_response_class=ORJSONResponse)
 
-# ✅ CORS Config (No empty values)
-origins = [
-    "https://tradingjournalpro.vercel.app",
-    "http://localhost:5173",
-]
-
+# ✅ Allow CORS for all origins (fix Render CORS issue)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # 🔥 Change this if you want to restrict specific origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

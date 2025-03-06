@@ -2,15 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
 
-
-
-
 from app.routes import sentiment 
 from app.routes import technical 
 
 app = FastAPI(default_response_class=ORJSONResponse)
 
-# ✅ Fixed: Removed empty value in 'origins' list
+# ✅ CORS Config (No empty values)
 origins = [
     "https://tradingjournalpro.vercel.app",
     "http://localhost:5173",
@@ -24,8 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ✅ Register the sentiment and technical routers
+# ✅ Register Routes
 app.include_router(sentiment.router, prefix="/sentiment", tags=["Sentiment Analysis"])
 app.include_router(technical.router, prefix="/technical", tags=["Technical Analysis"])
 

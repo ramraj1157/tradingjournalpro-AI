@@ -2,7 +2,7 @@ import requests
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 
-# API Key for NewsAPI
+# Directly define API Key (since you don't want dotenv)
 NEWS_API_KEY = "1bb2003b921d45619da52415e629215c"
 
 # Load FinBERT Model
@@ -14,20 +14,20 @@ def fetch_stock_news(stock_name: str):
     url = f"https://newsapi.org/v2/everything?q={stock_name}&apiKey={NEWS_API_KEY}&language=en"
     
     response = requests.get(url)
+    if response.status_code == 403:
+        print("❌ NewsAPI quota exceeded or API key invalid.")
+        return []
     if response.status_code != 200:
-        print(f"Error fetching news: {response.status_code}")
+        print(f"❌ Error fetching news: {response.status_code}")
         return []
     
     data = response.json()
     articles = data.get("articles", [])[:5]  # Get top 5 news articles
 
-    news_list = [
+    return [
         {"headline": article["title"], "link": article["url"]}
-        for article in articles
-        if article["title"] and article["url"]
+        for article in articles if article["title"] and article["url"]
     ]
-    
-    return news_list
 
 def analyze_sentiment(text: str):
     """Analyze sentiment using FinBERT"""
@@ -43,16 +43,4 @@ def analyze_sentiment(text: str):
 def get_stock_sentiment(stock_name: str):
     """Fetch news & analyze sentiment"""
     news_articles = fetch_stock_news(stock_name)
-    results = []
-
-    for article in news_articles:
-        sentiment_result = analyze_sentiment(article["headline"])
-        results.append({**article, **sentiment_result})
-    
-    return results
-
-# Example Usage
-stock_name = "Reliance"
-stock_sentiment = get_stock_sentiment(stock_name)
-for news in stock_sentiment:
-    print(news)
+    return [{**article, **analyze_sentiment(article["headline"])} for article in news_articles]
